@@ -1,70 +1,30 @@
 import psycopg2
 from sql_queries import create_table_queries, drop_table_queries
 
+
 def create_database():
     """
     Creates the Database to insert the data
     :return: cursor an connection
     """
-
-    #connect to default database
-    #connection
-    try:
-        conn = psycopg2.connect("host=localhost dbname=postgres user=postgres password= 707707")
-
-    except psycopg2.Error as e:
-        print("Error: Could not make the conn.set_session(autocommit=True) connection to PostgreSQl Database")
-        print(e)
-
-    #cursor 
-    try:
-        cur = conn.cursor()
-    except psycopg2.Error as e:
-        print("Error: could not get curser to the Database")
-        print(e)
-    #autocommit
+    # connect to default database
+    #conn = psycopg2.connect("host=127.0.0.1 dbname=studentdb user=student password=student")
+    conn = psycopg2.connect("host=localhost dbname=postgres user=postgres password=707707")
     conn.set_session(autocommit=True)
-
-
-
-    #Create sparkify_db database with UTF8 encoding
-    try:
-        print("DROP sparkify_db database")
-        cur.execute("DROP DATABASE IF EXISTS sparkify_db")
-        print("CREATE sparkify_db database")
-        cur.execute("CREATE DATABASE sparkify_db WITH ENCODING 'utf8' TEMPLATE template0")
-
-    except psycopg2.Error as e:
-        print("Error: Dropping Tables")
-        print(e)
-    # close connection to default database
-    cur.close()
-    conn.close()
-
-
-    #connect to sparkify_db database
-    #connection
-
-    try:
-        conn = psycopg2.connect("host=localhost dbname=sparkify_db user=postgres password= 707707")
-
-    except psycopg2.Error as e:
-        print("Error: Could not make theconn.set_session(autocommit=True) connection to PostgreSQl Database")
-        print(e)
+    cur = conn.cursor()
     
+    # create sparkify database with UTF8 encoding
+    cur.execute("DROP DATABASE IF EXISTS sparkifydb")
+    cur.execute("CREATE DATABASE sparkifydb WITH ENCODING 'utf8' TEMPLATE template0")
 
-    #cursor
-    try:
-        cur = conn.cursor()
-    except psycopg2.Error as e:
-        print("Error: could not get curser to the Database")
-        print(e)
-
-    #autocommit
-    conn.set_session(autocommit=True)
-
+    # close connection to default database
+    conn.close()    
+    
+    # connect to sparkify database
+    conn = psycopg2.connect("host=localhost dbname=sparkifydb user=postgres password=707707")
+    cur = conn.cursor()
+    
     return cur, conn
-
 
 
 def drop_tables(cur, conn):
@@ -73,12 +33,9 @@ def drop_tables(cur, conn):
     :param cur: cursor.
     :param conn: connection.
     """
-
-    for query in  drop_table_queries:
+    for query in drop_table_queries:
         cur.execute(query)
         conn.commit()
-
-    print("DROP ALL TABLES")    
 
 
 def create_tables(cur, conn):
@@ -87,20 +44,17 @@ def create_tables(cur, conn):
     :param cur: cursor.
     :param conn: connection.
     """
-
     for query in create_table_queries:
         cur.execute(query)
         conn.commit()
 
-    print("CREATE ALL TABLES") 
-
 
 def main():
     cur, conn = create_database()
-
+    
     drop_tables(cur, conn)
     create_tables(cur, conn)
-    conn.commit()
+
     conn.close()
 
 
